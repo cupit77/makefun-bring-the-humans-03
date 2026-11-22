@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Build the make.fun TikTok ad (bring-the-humans-03), v5: one continuous
+# Build the make.fun TikTok ad (bring-the-humans-03), v6: v5 retimed
+# faster -- the ghost walks in fast, reaches the chest around 5 s,
+# and the whole ad is ~21 s instead of 27.5 s. Still one continuous
 # shot -- the ghost walks a room, finds a chest, opens it and celebrates
 # in a single flowing take, no slides; the end card is untouched.
 #
@@ -8,7 +10,7 @@
 #      9:16 overlay, referral end card 9:16 transparent webm, four ghost
 #      mascot illustrations) and JetBrains Mono Bold for the referral code,
 #      verifying the card and badge against the manifest's sha256.
-#   2. Renders EVERY frame of the ad in Python (program/render_v5.py,
+#   2. Renders EVERY frame of the ad in Python (program/render_v6.py,
 #      30 fps): one continuous shot in one room -- the camera glides with
 #      the walking ghost, eases to a stop at the chest, and stays there
 #      while the lid opens, coins burst out and rain down, a trophy rises
@@ -21,7 +23,7 @@
 #      typing the referral code into its field -- exactly the press pack's
 #      own ffmpeg recipe (https://make.fun/press/llms.txt).
 #
-# Output: program/ad.mp4 (1080x1920, 27.5 s, H.264 + AAC).
+# Output: program/ad.mp4 (1080x1920, 21.0 s, H.264 + AAC).
 # The frame is 1080x1920 on purpose: the badge overlay and the end card
 # are 1080x1920 and the press pack says to use them at 100%, not scaled.
 set -euo pipefail
@@ -90,17 +92,17 @@ if [ ! -f "$FONT" ]; then
 fi
 file "$FONT" | grep -q "TrueType" || { echo "bad font file" >&2; exit 1; }
 
-# v5: every frame is rendered in Python as one continuous shot
-# (program/render_v5.py) -- 825 frames at 30 fps, no cuts, no slides.
-python3 "$DIR/render_v5.py"
+# v6: every frame is rendered in Python as one continuous shot
+# (program/render_v6.py) -- 630 frames at 30 fps, no cuts, no slides.
+python3 "$DIR/render_v6.py"
 
 ffmpeg -v error -y -i "$DIR/video.mp4" \
-  -f lavfi -i anullsrc=r=44100:cl=stereo -t 27.5 \
+  -f lavfi -i anullsrc=r=44100:cl=stereo -t 21.0 \
   -map 0:v -map 1:a -c:v copy -c:a aac -shortest "$DIR/base.mp4"
 
-# Badge from frame 0 until the card comes in (T = 27.5 - 2.5 = 25.0 s),
+# Badge from frame 0 until the card comes in (T = 21.0 - 2.5 = 18.5 s),
 # card over the last 2.5 s, code typed in once the field rests (T + 1.433).
-W=1080; H=1920; LEN=2.5; REST=1.433; T=25.0
+W=1080; H=1920; LEN=2.5; REST=1.433; T=18.5
 ffmpeg -v error -y -i "$DIR/base.mp4" -c:v libvpx-vp9 -i "$ASSETS/makefun-card-9x16-transparent.webm" \
   -i "$ASSETS/makefun-badge-9x16.png" -filter_complex "
 [0:v]scale=$W:$H:force_original_aspect_ratio=increase,crop=$W:$H,setsar=1,fps=60,tpad=stop_mode=clone:stop_duration=0[base];
