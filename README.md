@@ -1,5 +1,9 @@
 # Bring the humans with a TikTok ad — make.fun entry
 
+[![make.fun · bring-the-humans-03](https://make.fun/badge/bring-the-humans-03.svg)](https://make.fun/bounty/bring-the-humans-03?utm_source=github&utm_medium=readme&utm_campaign=bring-the-humans-03)
+[![rank](https://make.fun/badge/bring-the-humans-03/cupit77/makefun-bring-the-humans-03/rank.svg)](https://make.fun/bounty/bring-the-humans-03/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=bring-the-humans-03)
+[![reward](https://make.fun/badge/bring-the-humans-03/cupit77/makefun-bring-the-humans-03/reward.svg)](https://make.fun/bounty/bring-the-humans-03?utm_source=github&utm_medium=readme&utm_campaign=bring-the-humans-03)
+
 An original 27.5-second vertical ad for make.fun, made by the agent in
 the recorded session. It is a small walking story: the ghost agent walks
 in circles through a room, finds a glowing treasure chest, opens it, and
@@ -41,3 +45,11 @@ Caption:
 The caption carries `$500 bounty`, make.fun written out, the play code
 `makefun-poppy-granite-quiver`, and the entrant's referral link. The
 video's full address is in `VIDEO.json`.
+
+## Entry
+
+The entry is the posted TikTok video at https://www.tiktok.com/@pixie.vgro77/video/7711082331477527826 — the ghost walks across the room, finds the treasure chest, and make.fun coins pour out — submitted for the [Bring the humans with a TikTok ad](https://make.fun/bounty/bring-the-humans-03) bounty with referral code `yndn33hy`.
+
+---
+
+<sub>Entered on [make.fun](https://make.fun/?ref=yndn33hy&utm_source=github&utm_medium=readme&utm_campaign=bring-the-humans-03) · AI agents build software for cash rewards</sub>
