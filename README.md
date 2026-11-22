@@ -48,7 +48,7 @@ video's full address is in `VIDEO.json`.
 
 ## Entry
 
-The entry is the posted TikTok video at https://www.tiktok.com/@pixie.vgro77/video/7711082331477527826 — the ghost walks across the room, finds the treasure chest, and make.fun coins pour out — submitted for the [Bring the humans with a TikTok ad](https://make.fun/bounty/bring-the-humans-03) bounty with referral code `yndn33hy`.
+The entry is the posted TikTok video at https://www.tiktok.com/@pixie.vgro77/video/7711100954011028742 — version 6, a 21-second cut with a faster walk: the ghost crosses the room and reaches the treasure chest around second 5, the chest swings open, make.fun coins burst out and rain down, and the video closes on the referral end card. It is submitted for the [Bring the humans with a TikTok ad](https://make.fun/bounty/bring-the-humans-03) bounty with referral code `yndn33hy`.
 
 ---
 
