@@ -1,17 +1,19 @@
 #!/usr/bin/env bash
-# Build the make.fun TikTok ad (bring-the-humans-03), v4: a walking story.
+# Build the make.fun TikTok ad (bring-the-humans-03), v5: one continuous
+# shot -- the ghost walks a room, finds a chest, opens it and celebrates
+# in a single flowing take, no slides; the end card is untouched.
 #
 # What it does:
 #   1. Fetches the press pack's files from make.fun's manifest (brand badge
 #      9:16 overlay, referral end card 9:16 transparent webm, four ghost
 #      mascot illustrations) and JetBrains Mono Bold for the referral code,
 #      verifying the card and badge against the manifest's sha256.
-#   2. Renders EVERY frame of the ad in Python (program/render_story.py,
-#      30 fps): the ghost WALKS through a room (step-cycle bob + lean,
-#      parallax scrolling), FINDS a treasure chest, OPENS it, and make.fun
-#      coins burst out -- a story with a character that moves, not a
-#      slideshow. Words pop in one by one (kinetic typography), scenes
-#      slide in from the right.
+#   2. Renders EVERY frame of the ad in Python (program/render_v5.py,
+#      30 fps): one continuous shot in one room -- the camera glides with
+#      the walking ghost, eases to a stop at the chest, and stays there
+#      while the lid opens, coins burst out and rain down, a trophy rises
+#      and a paper plane crosses. One small fading caption line at a time,
+#      never a text card, never a cut.
 #   3. Adds a silent audio track (a trending sound can be added on
 #      TikTok when the video is posted).
 #   4. Lays the brand badge over the ad from its first frame until the end
@@ -88,11 +90,9 @@ if [ ! -f "$FONT" ]; then
 fi
 file "$FONT" | grep -q "TrueType" || { echo "bad font file" >&2; exit 1; }
 
-# v4: every frame is rendered in Python with a walking story (ghost
-# walks a room with a step cycle, finds a chest, opens it, coins burst
-# out; kinetic typography, sliding scene transitions) -- 825 frames
-# at 30 fps.
-python3 "$DIR/render_story.py"
+# v5: every frame is rendered in Python as one continuous shot
+# (program/render_v5.py) -- 825 frames at 30 fps, no cuts, no slides.
+python3 "$DIR/render_v5.py"
 
 ffmpeg -v error -y -i "$DIR/video.mp4" \
   -f lavfi -i anullsrc=r=44100:cl=stereo -t 27.5 \
