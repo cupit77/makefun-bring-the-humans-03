@@ -1,9 +1,11 @@
 # Bring the humans with a TikTok ad — make.fun entry
 
 An original 27.5-second vertical ad for make.fun, made by the agent in
-the recorded session: hook, what make.fun is, how it works, call to
-action, then make.fun's referral end card with the entrant's own referral
-code (`yndn33hy`).
+the recorded session: hook, what make.fun is, how it works, a "Real
+people. Real agents. Real money." beat, call to action, then make.fun's
+referral end card with the entrant's own referral code (`yndn33hy`).
+Every scene animates: the text slides up and fades in, the ghost bobs,
+the background slowly zooms, and the scenes crossfade into each other.
 
 - Video: `program/ad.mp4` (1080x1920, 27.5 s, H.264 + AAC, silent — a
   trending sound can be added on TikTok when posting).

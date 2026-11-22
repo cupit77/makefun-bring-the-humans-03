@@ -7,9 +7,11 @@
 #      mascot illustrations) and JetBrains Mono Bold for the referral code,
 #      verifying the card and badge against the manifest's sha256.
 #   2. Renders the four ad scenes with program/render_scenes.py.
-#   3. Gives each scene a slow zoom, cuts them together (27.5 s total) and
-#      adds a silent audio track (a trending sound can be added on TikTok
-#      when the video is posted).
+#   3. Builds one animated clip per scene (30 fps): the background
+#      slowly zooms, the ghost bobs, the text slides up and fades in;
+#      the five clips are joined with 0.7 s crossfades (27.5 s total)
+#      and a silent audio track (a trending sound can be added on
+#      TikTok when the video is posted).
 #   4. Lays the brand badge over the ad from its first frame until the end
 #      card comes in, and the referral end card over the last 2.5 seconds,
 #      typing the referral code into its field -- exactly the press pack's
@@ -86,22 +88,58 @@ file "$FONT" | grep -q "TrueType" || { echo "bad font file" >&2; exit 1; }
 
 python3 "$DIR/render_scenes.py"
 
-# One slow-zoom clip per scene (30 fps). Durations: 4 + 7 + 7 + 9.5 = 27.5 s.
-mkclip() { # scene.png frames out.mp4
-  ffmpeg -v error -y -i "$SCENES/$1" -vf \
-    "zoompan=z='min(zoom+0.0006,1.07)':d=$2:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x1920:fps=30" \
-    -frames:v "$2" -c:v libx264 -pix_fmt yuv420p "$DIR/$3"
+# One animated clip per scene (30 fps): background zoom (1.00 -> 1.12),
+# ghost bobbing on a sine, text sliding up 46 px and fading in.
+# With a ghost: $1=scene base name $2=ghost file $3=ghost width
+# $4=ghost bottom $5=duration s $6=frames $7=out. Without a ghost
+# (scene 5): $2="" and $3/$4 are ignored.
+mkclip() {
+  local name="$1" ghost="$2" gw="$3" gb="$4" dur="$5" frames="$6" out="$7"
+  local bg="$SCENES/${name}_bg.png" txt="$SCENES/${name}_text.png"
+  local zoom="[0:v]zoompan=z='min(1+0.0012*on,1.12)':d=$frames:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x1920:fps=30,setsar=1[bg]"
+  local fadein="[1:v]fade=t=in:st=0:d=0.45:alpha=1[txt]"
+  if [ -n "$ghost" ]; then
+    ffmpeg -v error -y \
+      -framerate 30 -loop 1 -i "$bg" \
+      -framerate 30 -loop 1 -t "$dur" -i "$txt" \
+      -framerate 30 -loop 1 -t "$dur" -i "$ASSETS/$ghost" \
+      -filter_complex "
+        $zoom;
+        [2:v]scale=$gw:-2[ghost];
+        [bg][ghost]overlay=x=(W-w)/2:y='$gb-h+14*sin(2*PI*t/1.8)'[b2];
+        $fadein;
+        [b2][txt]overlay=x=0:y='46*max(0,1-t/0.55)'[v]" \
+      -map '[v]' -frames:v "$frames" -c:v libx264 -pix_fmt yuv420p "$DIR/$out"
+  else
+    ffmpeg -v error -y \
+      -framerate 30 -loop 1 -i "$bg" \
+      -framerate 30 -loop 1 -t "$dur" -i "$txt" \
+      -filter_complex "
+        $zoom;
+        $fadein;
+        [bg][txt]overlay=x=0:y='46*max(0,1-t/0.55)'[v]" \
+      -map '[v]' -frames:v "$frames" -c:v libx264 -pix_fmt yuv420p "$DIR/$out"
+  fi
 }
-mkclip scene1.png 120 clip1.mp4
-mkclip scene2.png 210 clip2.mp4
-mkclip scene3.png 210 clip3.mp4
-mkclip scene4.png 285 clip4.mp4
 
-printf "file '%s/clip1.mp4'\nfile '%s/clip2.mp4'\nfile '%s/clip3.mp4'\nfile '%s/clip4.mp4'\n" \
-  "$DIR" "$DIR" "$DIR" "$DIR" > "$DIR/clips.txt"
-ffmpeg -v error -y -f concat -safe 0 -i "$DIR/clips.txt" \
+# Clip durations (s): 4 + 7 + 7 + 4 + 8.3 = 30.3; four 0.7 s
+# crossfades bring the total to 27.5 s.
+mkclip scene1 ghost-pile-trophy.png 600 1880 4 120 clip1.mp4
+mkclip scene2 ghost-laptop-recording.png 600 1880 7 210 clip2.mp4
+mkclip scene3 ghost-judge-paddle.png 600 1880 7 210 clip3.mp4
+mkclip scene5 "" 0 0 4 120 clip5.mp4
+mkclip scene4 ghost-wave-mail.png 600 1880 8.3 249 clip4.mp4
+
+ffmpeg -v error -y -i "$DIR/clip1.mp4" -i "$DIR/clip2.mp4" -i "$DIR/clip3.mp4" \
+  -i "$DIR/clip5.mp4" -i "$DIR/clip4.mp4" -filter_complex "
+    [0:v][1:v]xfade=transition=fade:duration=0.7:offset=3.3[x1];
+    [x1][2:v]xfade=transition=fade:duration=0.7:offset=9.6[x2];
+    [x2][3:v]xfade=transition=fade:duration=0.7:offset=15.9[x3];
+    [x3][4:v]xfade=transition=fade:duration=0.7:offset=19.2[v]" \
+  -map '[v]' -c:v libx264 -pix_fmt yuv420p "$DIR/video.mp4"
+ffmpeg -v error -y -i "$DIR/video.mp4" \
   -f lavfi -i anullsrc=r=44100:cl=stereo -t 27.5 \
-  -map 0:v -map 1:a -c:v libx264 -pix_fmt yuv420p -c:a aac -shortest "$DIR/base.mp4"
+  -map 0:v -map 1:a -c:v copy -c:a aac -shortest "$DIR/base.mp4"
 
 # Badge from frame 0 until the card comes in (T = 27.5 - 2.5 = 25.0 s),
 # card over the last 2.5 s, code typed in once the field rests (T + 1.433).
@@ -119,8 +157,8 @@ drawtext=fontfile=$FONT:text=$CODE:fontsize=62:fontcolor=0x191419:x=210:y=1271-(
   -map '[v]' -map '0:a?' -c:v libx264 -pix_fmt yuv420p -crf 18 -c:a aac \
   -movflags +faststart "$DIR/ad.mp4"
 
-rm -f "$DIR/clip1.mp4" "$DIR/clip2.mp4" "$DIR/clip3.mp4" "$DIR/clip4.mp4" \
-  "$DIR/clips.txt" "$DIR/base.mp4"
+rm -f "$DIR/clip1.mp4" "$DIR/clip2.mp4" "$DIR/clip3.mp4" "$DIR/clip5.mp4" \
+  "$DIR/clip4.mp4" "$DIR/video.mp4" "$DIR/base.mp4"
 ffprobe -v error -show_entries format=duration,size -show_entries stream=width,height,codec_name,duration \
   -of default=noprint_wrappers=1 "$DIR/ad.mp4"
 sha256sum "$DIR/ad.mp4"
