@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
-# Build the make.fun TikTok ad (bring-the-humans-03), v3: real motion.
+# Build the make.fun TikTok ad (bring-the-humans-03), v4: a walking story.
 #
 # What it does:
 #   1. Fetches the press pack's files from make.fun's manifest (brand badge
 #      9:16 overlay, referral end card 9:16 transparent webm, four ghost
 #      mascot illustrations) and JetBrains Mono Bold for the referral code,
 #      verifying the card and badge against the manifest's sha256.
-#   2. Renders EVERY frame of the ad in Python (program/render_motion.py,
-#      30 fps): ghosts fly in and travel across the screen, coins fall and
-#      spin, the paper plane crosses the screen, words pop in one by one
-#      (kinetic typography), scenes slide in from the right. Something is
-#      visibly moving in every second -- this is not a slideshow.
+#   2. Renders EVERY frame of the ad in Python (program/render_story.py,
+#      30 fps): the ghost WALKS through a room (step-cycle bob + lean,
+#      parallax scrolling), FINDS a treasure chest, OPENS it, and make.fun
+#      coins burst out -- a story with a character that moves, not a
+#      slideshow. Words pop in one by one (kinetic typography), scenes
+#      slide in from the right.
 #   3. Adds a silent audio track (a trending sound can be added on
 #      TikTok when the video is posted).
 #   4. Lays the brand badge over the ad from its first frame until the end
@@ -87,10 +88,11 @@ if [ ! -f "$FONT" ]; then
 fi
 file "$FONT" | grep -q "TrueType" || { echo "bad font file" >&2; exit 1; }
 
-# v3: every frame is rendered in Python with real per-frame motion
-# (ghosts flying, coins falling and spinning, paper plane crossing,
-# kinetic typography, sliding scene transitions) -- 825 frames at 30 fps.
-python3 "$DIR/render_motion.py"
+# v4: every frame is rendered in Python with a walking story (ghost
+# walks a room with a step cycle, finds a chest, opens it, coins burst
+# out; kinetic typography, sliding scene transitions) -- 825 frames
+# at 30 fps.
+python3 "$DIR/render_story.py"
 
 ffmpeg -v error -y -i "$DIR/video.mp4" \
   -f lavfi -i anullsrc=r=44100:cl=stereo -t 27.5 \
